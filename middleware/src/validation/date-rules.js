@@ -8,9 +8,9 @@
  * Plain ASCII - no emojis.
  */
 
-export const ERROR_PAST_DATE = "Travel Date cannot be in the past.";
-export const ERROR_BEYOND_12_MONTHS = "Travel Date must be within the next 12 months.";
-export const ERROR_INVALID_FORMAT = "Invalid travel date format. Expected YYYY-MM-DD.";
+export const ERROR_PAST_DATE = 'Travel Date cannot be in the past.';
+export const ERROR_BEYOND_12_MONTHS = 'Travel Date must be within the next 12 months.';
+export const ERROR_INVALID_FORMAT = 'Invalid travel date format. Expected YYYY-MM-DD.';
 
 /**
  * Normalises a date input (string YYYY-MM-DD or Date instance) to a UTC calendar date at 00:00:00.000.
@@ -31,7 +31,7 @@ export function parseCalendarDate(input) {
     return new Date(Date.UTC(input.getUTCFullYear(), input.getUTCMonth(), input.getUTCDate()));
   }
 
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     const trimmed = input.trim();
     const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
     if (!match) {
@@ -135,8 +135,8 @@ export function validateTravelDate(travelDate, today = new Date()) {
   let baseDate;
   try {
     baseDate = parseCalendarDate(today);
-  } catch (_err) {
-    return { isValid: false, error: "Invalid reference today date." };
+  } catch {
+    return { isValid: false, error: 'Invalid reference today date.' };
   }
 
   if (tDate.getTime() < baseDate.getTime()) {
