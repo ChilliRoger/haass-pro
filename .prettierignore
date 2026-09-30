@@ -1,0 +1,8 @@
+node_modules/
+middleware/node_modules/
+coverage/
+middleware/coverage/
+dist/
+build/
+.env
+*.log
