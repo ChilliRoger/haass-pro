@@ -20,15 +20,21 @@ describe('orchestrator module', () => {
       notesPosted,
       tagsUpdated,
       async getTicket(id) {
-        if (ticketFail) throw new Error('Network error getting ticket');
+        if (ticketFail) {
+          throw new Error('Network error getting ticket');
+        }
         return { id, tags: [...tags] };
       },
-      async getRequestedItems(id) {
-        if (itemsFail) throw new Error('Network error getting items');
+      async getRequestedItems(_id) {
+        if (itemsFail) {
+          throw new Error('Network error getting items');
+        }
         return requestedItems;
       },
       async addNote(id, note) {
-        if (addNoteFail) throw new Error('Failed to post note');
+        if (addNoteFail) {
+          throw new Error('Failed to post note');
+        }
         notesPosted.push({ id, ...note });
         return { conversation: { id: 1001 } };
       },
