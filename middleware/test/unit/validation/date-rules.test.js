@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ERROR_BEYOND_12_MONTHS,
   ERROR_PAST_DATE,
+  isBeyond12Months,
   isPastDate,
   validateTravelDate,
 } from "../../../src/validation/date-rules.js";
@@ -30,6 +32,15 @@ describe("date-rules boundary tests", () => {
     assert.equal(isPastDate(TODAY, TODAY), false);
 
     const result = validateTravelDate(TODAY, TODAY);
+    assert.equal(result.isValid, true);
+    assert.equal(result.error, null);
+  });
+
+  it("R-23 boundary: accepts travel date exactly 12 months from today without error", () => {
+    const exactly12Months = "2027-09-30";
+    assert.equal(isBeyond12Months(exactly12Months, TODAY), false);
+
+    const result = validateTravelDate(exactly12Months, TODAY);
     assert.equal(result.isValid, true);
     assert.equal(result.error, null);
   });
