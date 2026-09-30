@@ -1,0 +1,30 @@
+# render.yaml - Infrastructure as Code Blueprint for Render Deployment
+# Deploys haass-weather-travel-middleware on Render Free Tier
+
+services:
+  - type: web
+    name: haass-weather-travel-middleware
+    runtime: node
+    rootDir: middleware
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: LOG_LEVEL
+        value: info
+      - key: RATE_LIMIT_RPM
+        value: 60
+      - key: WEBHOOK_USERNAME
+        generateValue: true
+      - key: WEBHOOK_PASSWORD
+        generateValue: true
+      - key: FRESHSERVICE_DOMAIN
+        sync: false
+      - key: FRESHSERVICE_API_KEY
+        sync: false
