@@ -69,9 +69,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Phase 2: Mock-free unit test suite with 92%+ coverage using node:test
 - Phase 2: UTF-8 BOM resolution in check-no-emoji script for CI
 
-## [0.2.0] - TBD
+## [0.2.0] - 2026-09-30
 
-Tag applied after Phase 8 (demo tooling) is complete.
+### Added
+- Phase 8: Pre-demo warm-up script (scripts/warmup.js) preventing Render free-tier cold-start timeouts
+- Phase 8: Webhook simulator CLI (scripts/simulate-webhook.js) testing end-to-end webhook latency and formats
+- Phase 8: Scenario evaluation runner (scripts/run-demo-scenarios.js) demonstrating all 4 review call scenarios locally
+- Phase 8: Complete presentation runbook and defense script in docs/03-demo-guide.md
+- Phase 8: Modern ESLint flat config tuning for Node 24 web standard globals
 
 ## [1.0.0] - TBD
 
