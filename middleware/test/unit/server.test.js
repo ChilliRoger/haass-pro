@@ -132,6 +132,36 @@ describe('server and authentication', () => {
       assert.equal(body.ticketId, 101);
       assert.equal(body.status, 'processing_scheduled');
     });
+
+    it('accepts snake_case ticket_id and nested webhook formats', async () => {
+      const auth = Buffer.from('freshservice-agent:secret-token-pass').toString('base64');
+
+      // snake_case
+      const res1 = await fetch(`${baseUrl}/webhook/service-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${auth}`,
+        },
+        body: JSON.stringify({ ticket_id: 102 }),
+      });
+      assert.equal(res1.status, 202);
+      const body1 = await res1.json();
+      assert.equal(body1.ticketId, 102);
+
+      // nested freshservice_webhook wrapper
+      const res2 = await fetch(`${baseUrl}/webhook/service-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${auth}`,
+        },
+        body: JSON.stringify({ freshservice_webhook: { ticket_id: 103 } }),
+      });
+      assert.equal(res2.status, 202);
+      const body2 = await res2.json();
+      assert.equal(body2.ticketId, 103);
+    });
   });
 
   describe('404 handler', () => {
