@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 5: Safe HTML sanitisation utility (sanitise.js) escaping dangerous characters
+- Phase 5: Deterministic weather recommendation engine (recommender.js) evaluating Heat, Cold, Rain, Storm/Wind, High UV, and Pleasant conditions
+- Phase 5: Composite risk scoring (0-100), verdict calculation (Go, Go with caution, Reconsider), priority ordering, and Freshservice risk tagging (weather-risk-low, weather-risk-medium, weather-risk-high)
+- Phase 5: Personalisation layers (personaliser.js) with trip-type tailoring, budget-tier adjustments, and special-needs keyword awareness
+- Phase 5: HTML trip brief note builder (note-builder.js) producing formatted Freshservice conversation notes with Open-Meteo and GeoNames attribution, fallback notices, and date validation alerts
+- Phase 5: Mock-free unit test suite for recommender, personaliser, and note-builder achieving 97%+ line coverage
 - Phase 4: Open-Meteo Geocoding client with retry logic and formatted place resolution
 - Phase 4: Tier 1 Forecast (16 days), Tier 2 Seasonal (forecast_months=6), and Tier 3 Current weather API clients
 - Phase 4: Weather tier selector adhering to ADR-004 and FORECAST_MAX_DAYS (14) / SEASONAL_MAX_DAYS (180)
