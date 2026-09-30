@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { evaluateHeatRule } from "../../../src/engine/recommender.js";
+import { evaluateColdRule, evaluateHeatRule } from "../../../src/engine/recommender.js";
 
 describe("recommender engine", () => {
   describe("Heat Rule evaluation", () => {
@@ -23,6 +23,35 @@ describe("recommender engine", () => {
       const res = evaluateHeatRule({ tempC: 22 });
       assert.equal(res.risk, 0);
       assert.equal(res.alerts.length, 0);
+    });
+  });
+
+  describe("Cold Rule evaluation", () => {
+    it("flags cold advisory when temp is at or below 5C", () => {
+      const res = evaluateColdRule({ tempC: 3 });
+      assert.equal(res.risk, 25);
+      assert.equal(res.severity, 2);
+      assert.match(res.alerts[0], /Cold weather around 3C/);
+      assert.ok(res.packing.includes("Thermal layers"));
+    });
+
+    it("flags freezing conditions when temp <= 0C", () => {
+      const res = evaluateColdRule({ tempC: -4 });
+      assert.equal(res.risk, 40);
+      assert.equal(res.severity, 3);
+      assert.match(res.alerts[0], /Freezing conditions at -4C/);
+    });
+
+    it("flags snowfall and adds waterproof footwear", () => {
+      const res = evaluateColdRule({ tempC: 1, wmoCode: 71 });
+      assert.equal(res.risk, 45); // 25 (cold) + 20 (snow)
+      assert.ok(res.packing.includes("Waterproof winter boots"));
+      assert.match(res.alerts[1], /Snowfall expected/);
+    });
+
+    it("returns zero risk for warm temperature", () => {
+      const res = evaluateColdRule({ tempC: 20 });
+      assert.equal(res.risk, 0);
     });
   });
 });
