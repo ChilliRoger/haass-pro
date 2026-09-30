@@ -6,8 +6,6 @@ import {
   extractServiceRequestFields,
   TAG_WEATHER_BRIEF_POSTED,
   TAG_RISK_LOW,
-  TAG_RISK_MEDIUM,
-  TAG_RISK_HIGH,
 } from '../../../src/freshservice/client.js';
 
 describe('freshservice client module', () => {

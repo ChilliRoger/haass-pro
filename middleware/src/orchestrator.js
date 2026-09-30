@@ -102,8 +102,12 @@ export async function processTicketWebhook(ticketId, options = {}) {
 
   // Validate presence of mandatory fields
   const missingFields = [];
-  if (!destinationCity) missingFields.push('Destination City');
-  if (!travelDate) missingFields.push('Travel Date');
+  if (!destinationCity) {
+    missingFields.push('Destination City');
+  }
+  if (!travelDate) {
+    missingFields.push('Travel Date');
+  }
 
   if (missingFields.length > 0) {
     log.warn({ missingFields }, 'Required catalog fields missing from service request');

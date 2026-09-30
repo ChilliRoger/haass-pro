@@ -65,10 +65,14 @@ export function extractServiceRequestFields(requestedItems) {
   // Iterate over requested items and check custom_fields
   for (const item of requestedItems) {
     const fields = item?.custom_fields;
-    if (!fields || typeof fields !== 'object') continue;
+    if (!fields || typeof fields !== 'object') {
+      continue;
+    }
 
     for (const [key, val] of Object.entries(fields)) {
-      if (val === undefined || val === null || val === '') continue;
+      if (val === undefined || val === null || val === '') {
+        continue;
+      }
       const lowerKey = key.toLowerCase();
 
       // Destination City
@@ -279,7 +283,7 @@ export class FreshserviceClient {
         formData.append('body', body);
         formData.append('private', String(Boolean(isPrivate)));
 
-        return await this._request(`/api/v2/tickets/${ticketId}/notes`, {
+        return this._request(`/api/v2/tickets/${ticketId}/notes`, {
           method: 'POST',
           body: formData,
         });
