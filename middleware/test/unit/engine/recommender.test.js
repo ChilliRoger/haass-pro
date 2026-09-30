@@ -5,6 +5,7 @@ import {
   evaluateHeatRule,
   evaluateRainRule,
   evaluateStormAndWindRule,
+  evaluateUvRule,
 } from "../../../src/engine/recommender.js";
 
 describe("recommender engine", () => {
@@ -117,6 +118,29 @@ describe("recommender engine", () => {
       const res = evaluateStormAndWindRule({ windKmh: 12, wmoCode: 1 });
       assert.equal(res.risk, 0);
       assert.equal(res.alerts.length, 0);
+    });
+  });
+
+  describe("UV Rule evaluation", () => {
+    it("flags very high UV risk when uvIndex >= 8", () => {
+      const res = evaluateUvRule({ uvIndex: 9.2 });
+      assert.equal(res.risk, 25);
+      assert.equal(res.severity, 2);
+      assert.match(res.alerts[0], /Very high UV index/);
+      assert.ok(res.packing.includes("Broad-spectrum SPF 50+ sunscreen"));
+    });
+
+    it("flags high UV advisory when uvIndex is between 6 and 7.9", () => {
+      const res = evaluateUvRule({ uvIndex: 6.8 });
+      assert.equal(res.risk, 15);
+      assert.equal(res.severity, 1);
+      assert.match(res.alerts[0], /High UV index/);
+      assert.ok(res.packing.includes("SPF 30+ sunscreen"));
+    });
+
+    it("returns zero risk when UV index is below 6 or null (seasonal tier)", () => {
+      assert.equal(evaluateUvRule({ uvIndex: 4 }).risk, 0);
+      assert.equal(evaluateUvRule({ uvIndex: null }).risk, 0);
     });
   });
 });

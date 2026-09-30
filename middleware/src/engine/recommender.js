@@ -206,3 +206,40 @@ export function evaluateStormAndWindRule(weather) {
     severity,
   };
 }
+
+/**
+ * Evaluates ultraviolet (UV) radiation levels against UV_HIGH and UV_VERY_HIGH thresholds.
+ *
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ risk: number, alerts: string[], packing: string[], severity: number }}
+ */
+export function evaluateUvRule(weather) {
+  const uv = weather?.uvIndex;
+  if (uv === null || uv === undefined || typeof uv !== "number") {
+    return { risk: 0, alerts: [], packing: [], severity: 0 };
+  }
+
+  let risk = 0;
+  let severity = 0;
+  const alerts = [];
+  const packing = [];
+
+  if (uv >= UV_VERY_HIGH) {
+    risk = 25;
+    severity = 2;
+    alerts.push(`Very high UV index (${uv}). Extreme sun protection needed; limit direct midday exposure.`);
+    packing.push("Broad-spectrum SPF 50+ sunscreen", "UV400 sunglasses", "Wide-brim sun hat");
+  } else if (uv >= UV_HIGH) {
+    risk = 15;
+    severity = 1;
+    alerts.push(`High UV index (${uv}). Sun protection recommended for outdoor sightseeing.`);
+    packing.push("SPF 30+ sunscreen", "Sunglasses");
+  }
+
+  return {
+    risk,
+    alerts,
+    packing,
+    severity,
+  };
+}
