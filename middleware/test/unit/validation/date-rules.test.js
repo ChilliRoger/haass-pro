@@ -44,4 +44,21 @@ describe("date-rules boundary tests", () => {
     assert.equal(result.isValid, true);
     assert.equal(result.error, null);
   });
+
+  it("R-21 boundary: rejects travel date strictly greater than 12 months from today with exact error string", () => {
+    const twelveMonthsPlusOneDay = "2027-10-01";
+    const twoYearsLater = "2028-09-30";
+
+    assert.equal(isBeyond12Months(twelveMonthsPlusOneDay, TODAY), true);
+    assert.equal(isBeyond12Months(twoYearsLater, TODAY), true);
+
+    const resultOneDay = validateTravelDate(twelveMonthsPlusOneDay, TODAY);
+    assert.equal(resultOneDay.isValid, false);
+    assert.equal(resultOneDay.error, ERROR_BEYOND_12_MONTHS);
+    assert.equal(resultOneDay.error, "Travel Date must be within the next 12 months.");
+
+    const resultTwoYears = validateTravelDate(twoYearsLater, TODAY);
+    assert.equal(resultTwoYears.isValid, false);
+    assert.equal(resultTwoYears.error, ERROR_BEYOND_12_MONTHS);
+  });
 });
