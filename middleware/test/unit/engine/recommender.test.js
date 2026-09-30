@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { evaluateColdRule, evaluateHeatRule } from "../../../src/engine/recommender.js";
+import {
+  evaluateColdRule,
+  evaluateHeatRule,
+  evaluateRainRule,
+} from "../../../src/engine/recommender.js";
 
 describe("recommender engine", () => {
   describe("Heat Rule evaluation", () => {
@@ -52,6 +56,35 @@ describe("recommender engine", () => {
     it("returns zero risk for warm temperature", () => {
       const res = evaluateColdRule({ tempC: 20 });
       assert.equal(res.risk, 0);
+    });
+  });
+
+  describe("Rain Rule evaluation", () => {
+    it("flags high rain risk when rain probability >= 60%", () => {
+      const res = evaluateRainRule({ rainChancePct: 75, precipSumMm: 12 });
+      assert.equal(res.risk, 30);
+      assert.equal(res.severity, 2);
+      assert.match(res.alerts[0], /High likelihood of rain/);
+      assert.ok(res.packing.includes("Compact umbrella"));
+    });
+
+    it("flags moderate rain advisory when rain probability is between 30% and 59%", () => {
+      const res = evaluateRainRule({ rainChancePct: 40 });
+      assert.equal(res.risk, 15);
+      assert.equal(res.severity, 1);
+      assert.match(res.alerts[0], /Moderate chance of rain/);
+    });
+
+    it("identifies rain from WMO code when probability is null (seasonal tier)", () => {
+      const res = evaluateRainRule({ rainChancePct: null, wmoCode: 61 });
+      assert.equal(res.risk, 15);
+      assert.match(res.alerts[0], /Moderate chance of rain/);
+    });
+
+    it("returns zero risk when rain chance is below threshold", () => {
+      const res = evaluateRainRule({ rainChancePct: 10, precipSumMm: 0.1 });
+      assert.equal(res.risk, 0);
+      assert.equal(res.alerts.length, 0);
     });
   });
 });

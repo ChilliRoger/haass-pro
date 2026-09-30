@@ -103,3 +103,53 @@ export function evaluateColdRule(weather) {
     severity,
   };
 }
+
+/**
+ * Evaluates rainfall probability, precipitation volume, and rain weather codes.
+ *
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ risk: number, alerts: string[], packing: string[], severity: number }}
+ */
+export function evaluateRainRule(weather) {
+  const rainPct = weather?.rainChancePct;
+  const precipMm = weather?.precipSumMm;
+  const code = weather?.wmoCode;
+
+  const isRainByCode = typeof code === "number" && (
+    (code >= 51 && code <= 67) ||
+    (code >= 80 && code <= 82)
+  );
+
+  let risk = 0;
+  let severity = 0;
+  const alerts = [];
+  const packing = [];
+
+  const hasHighChance = (typeof rainPct === "number" && rainPct >= RAIN_HIGH_PCT) ||
+                        (typeof precipMm === "number" && precipMm >= 10);
+
+  const hasModerateChance = (typeof rainPct === "number" && rainPct >= RAIN_MODERATE_PCT) ||
+                            (typeof precipMm === "number" && precipMm >= 3) ||
+                            isRainByCode;
+
+  if (hasHighChance) {
+    risk = 30;
+    severity = 2;
+    const detail = typeof rainPct === "number" ? `${rainPct}% chance` : `${precipMm}mm expected`;
+    alerts.push(`High likelihood of rain (${detail}). Carry rain protection and prepare for wet ground.`);
+    packing.push("Compact umbrella", "Waterproof rain jacket", "Water-resistant footwear");
+  } else if (hasModerateChance) {
+    risk = 15;
+    severity = 1;
+    const detail = typeof rainPct === "number" ? `${rainPct}% chance` : "scattered showers expected";
+    alerts.push(`Moderate chance of rain (${detail}). Keep a portable umbrella handy.`);
+    packing.push("Compact umbrella");
+  }
+
+  return {
+    risk,
+    alerts,
+    packing,
+    severity,
+  };
+}
