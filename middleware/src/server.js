@@ -14,6 +14,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { loadConfig } from './config.js';
 import { createLogger } from './logger.js';
+import { processTicketWebhook } from './orchestrator.js';
 
 /**
  * Constant-time string comparison using SHA-256 digest buffers.
@@ -125,9 +126,12 @@ export function createApp(customConfig, options = {}) {
     log,
   });
 
+  const webhookRunner = options.processWebhookFn || processTicketWebhook;
+
   // 7. Service request webhook endpoint
   app.post('/webhook/service-request', auth, (req, res) => {
-    const rawTicketId = req.body?.ticketId ?? req.body?.ticket_id;
+    const rawTicketId =
+      req.body?.ticketId ?? req.body?.ticket_id ?? req.body?.freshservice_webhook?.ticket_id;
     const ticketId = Number(rawTicketId);
 
     if (!ticketId || !Number.isInteger(ticketId) || ticketId <= 0) {
@@ -148,9 +152,14 @@ export function createApp(customConfig, options = {}) {
     const reqLogger = log.child({ ticketId, correlationId });
     reqLogger.info('Webhook accepted; async processing started');
 
-    // Asynchronous stub - will be wired to orchestrator in Phase 7
     setImmediate(() => {
-      reqLogger.info('Async task completed stub');
+      webhookRunner(ticketId)
+        .then((result) => {
+          reqLogger.info({ result }, 'Webhook pipeline processing completed');
+        })
+        .catch((err) => {
+          reqLogger.error({ err: err.message }, 'Unhandled error in webhook orchestrator');
+        });
     });
   });
 

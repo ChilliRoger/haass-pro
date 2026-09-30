@@ -10,6 +10,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 7: Asynchronous webhook orchestrator pipeline (orchestrator.js) coordinating ticket retrieval, stateless idempotency, date validation, geocoding, tiered weather retrieval, recommendation evaluation, note posting, and tag management
+- Phase 7: Wired processTicketWebhook into POST /webhook/service-request with immediate HTTP 202 response and background execution
+- Phase 7: Extended webhook payload parsing to support ticketId, ticket_id, and nested freshservice_webhook wrappers
+- Phase 7: Comprehensive unit test suite for orchestrator covering idempotency skips, fallback notes, and Tier 1/2/3 pipelines
 - Phase 6: Freshservice REST API v2 client (client.js) with Basic Auth (apiKey:X) and 429 rate limit backoff
 - Phase 6: Flexible custom fields extractor for requested items accommodating arbitrary suffixes
 - Phase 6: Ticket tag read-merge-write update preventing tag clobbering
