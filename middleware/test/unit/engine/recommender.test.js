@@ -4,6 +4,7 @@ import {
   evaluateColdRule,
   evaluateHeatRule,
   evaluateRainRule,
+  evaluateStormAndWindRule,
 } from "../../../src/engine/recommender.js";
 
 describe("recommender engine", () => {
@@ -83,6 +84,37 @@ describe("recommender engine", () => {
 
     it("returns zero risk when rain chance is below threshold", () => {
       const res = evaluateRainRule({ rainChancePct: 10, precipSumMm: 0.1 });
+      assert.equal(res.risk, 0);
+      assert.equal(res.alerts.length, 0);
+    });
+  });
+
+  describe("Storm and Wind Rule evaluation", () => {
+    it("flags thunderstorm hazard with high risk points", () => {
+      const res = evaluateStormAndWindRule({ wmoCode: 95 });
+      assert.equal(res.risk, 50);
+      assert.equal(res.severity, 4);
+      assert.match(res.alerts[0], /Thunderstorms forecasted/);
+      assert.ok(res.packing.includes("Emergency power bank"));
+    });
+
+    it("flags gale-force winds when wind speed >= 75 km/h", () => {
+      const res = evaluateStormAndWindRule({ windKmh: 80, gustsKmh: 95 });
+      assert.equal(res.risk, 40);
+      assert.equal(res.severity, 3);
+      assert.match(res.alerts[0], /Gale-force winds/);
+      assert.ok(res.packing.includes("Heavy windbreaker"));
+    });
+
+    it("flags strong winds when wind speed is between 50 and 74 km/h", () => {
+      const res = evaluateStormAndWindRule({ windKmh: 55 });
+      assert.equal(res.risk, 20);
+      assert.equal(res.severity, 2);
+      assert.match(res.alerts[0], /Strong gusty winds/);
+    });
+
+    it("returns zero risk for calm conditions", () => {
+      const res = evaluateStormAndWindRule({ windKmh: 12, wmoCode: 1 });
       assert.equal(res.risk, 0);
       assert.equal(res.alerts.length, 0);
     });
