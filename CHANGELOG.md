@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to haass-weather-travel are documented in this file.
 
@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 1: docs/01-requirements-analysis.md - full requirements table, date rules, assumptions
+- Phase 1: docs/references.md - all sources with retrieval dates and live-call findings
+- Phase 1: docs/02-architecture.md - Mermaid sequence diagram, component map, data shapes
+- Phase 1: ADR-001 through ADR-009 in docs/adr/
+- Phase 1: Live-tested Open-Meteo Forecast (16 days, effective 14), Geocoding, and Seasonal APIs
 - Phase 0: Repository bootstrap - .gitignore, LICENSE, README, .editorconfig
 - Phase 0: Directory skeleton with .gitkeep placeholders
 - Phase 0: .env.example with all required environment variables
