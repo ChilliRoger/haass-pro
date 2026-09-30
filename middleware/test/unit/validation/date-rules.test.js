@@ -61,4 +61,21 @@ describe("date-rules boundary tests", () => {
     assert.equal(resultTwoYears.isValid, false);
     assert.equal(resultTwoYears.error, ERROR_BEYOND_12_MONTHS);
   });
+
+  it("leap year boundary: clamps Feb 29 to Feb 28 next non-leap year", () => {
+    const leapDay = "2024-02-29";
+    const clampedNextYear = "2025-02-28";
+    const oneDayBeyondClamped = "2025-03-01";
+
+    assert.equal(isBeyond12Months(clampedNextYear, leapDay), false);
+    assert.equal(isBeyond12Months(oneDayBeyondClamped, leapDay), true);
+
+    const validResult = validateTravelDate(clampedNextYear, leapDay);
+    assert.equal(validResult.isValid, true);
+    assert.equal(validResult.error, null);
+
+    const invalidResult = validateTravelDate(oneDayBeyondClamped, leapDay);
+    assert.equal(invalidResult.isValid, false);
+    assert.equal(invalidResult.error, ERROR_BEYOND_12_MONTHS);
+  });
 });
