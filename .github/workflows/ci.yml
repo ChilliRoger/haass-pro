@@ -1,0 +1,194 @@
+﻿# .github/workflows/ci.yml
+# CI pipeline for haass-weather-travel middleware.
+# Runs on every push to main and on every pull request targeting main.
+#
+# Jobs:
+#   lint         - ESLint + Prettier format check
+#   no-emoji     - Fail if any tracked file contains emoji
+#   secret-scan  - gitleaks secret detection
+#   unit-test    - node:test with V8 coverage (threshold 85%)
+#   audit        - npm audit (fail on high or critical)
+#   docker-build - Verify the Dockerfile builds
+#   live-contract - Hits real Open-Meteo APIs; runs separately on push to main
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  # ------------------------------------------------------------------
+  # 1. Lint: ESLint + Prettier
+  # ------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: middleware/package-lock.json
+
+      - name: Install dependencies
+        working-directory: middleware
+        run: npm ci
+
+      - name: ESLint
+        working-directory: middleware
+        run: npm run lint
+
+      - name: Prettier format check
+        working-directory: middleware
+        run: npm run format:check
+
+  # ------------------------------------------------------------------
+  # 2. No-emoji check
+  # ------------------------------------------------------------------
+  no-emoji:
+    name: No-emoji check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run no-emoji check
+        run: node scripts/check-no-emoji.js
+
+  # ------------------------------------------------------------------
+  # 3. Secret scan (gitleaks)
+  # ------------------------------------------------------------------
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for gitleaks)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ------------------------------------------------------------------
+  # 4. Unit tests with coverage
+  # ------------------------------------------------------------------
+  unit-test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: middleware/package-lock.json
+
+      - name: Install dependencies
+        working-directory: middleware
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        working-directory: middleware
+        run: npm test
+        env:
+          NODE_ENV: test
+
+  # ------------------------------------------------------------------
+  # 5. npm audit
+  # ------------------------------------------------------------------
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: middleware/package-lock.json
+
+      - name: Install dependencies
+        working-directory: middleware
+        run: npm ci
+
+      - name: npm audit
+        working-directory: middleware
+        run: npm audit --audit-level=high
+
+  # ------------------------------------------------------------------
+  # 6. Docker build verification
+  # ------------------------------------------------------------------
+  docker-build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: middleware
+          push: false
+          tags: haass-weather-travel:ci
+
+  # ------------------------------------------------------------------
+  # 7. Live contract tests (separate job - upstream outages visible)
+  # Runs only on push to main (not on PRs) to avoid hitting rate limits.
+  # ------------------------------------------------------------------
+  live-contract:
+    name: Live contract tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: middleware/package-lock.json
+
+      - name: Install dependencies
+        working-directory: middleware
+        run: npm ci
+
+      - name: Run live contract tests
+        working-directory: middleware
+        run: npm run test:live
+        env:
+          NODE_ENV: test
+          # No Freshservice credentials needed for Open-Meteo live tests.
+          # Freshservice read-only live tests are local-only (see CONTRIBUTING.md).
