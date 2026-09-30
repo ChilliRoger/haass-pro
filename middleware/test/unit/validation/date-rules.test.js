@@ -25,4 +25,12 @@ describe("date-rules boundary tests", () => {
     assert.equal(resultPastYear.isValid, false);
     assert.equal(resultPastYear.error, ERROR_PAST_DATE);
   });
+
+  it("R-22 boundary: accepts travel date equal to today without error", () => {
+    assert.equal(isPastDate(TODAY, TODAY), false);
+
+    const result = validateTravelDate(TODAY, TODAY);
+    assert.equal(result.isValid, true);
+    assert.equal(result.error, null);
+  });
 });
