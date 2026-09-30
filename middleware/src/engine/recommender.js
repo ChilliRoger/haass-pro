@@ -276,3 +276,104 @@ export function evaluatePleasantRule(weather) {
     packing: [],
   };
 }
+
+/**
+ * Computes the aggregated weather risk score (0-100), verdict, and triage tag.
+ *
+ * @param {number} riskScore
+ * @returns {{ verdict: "Go" | "Go with caution" | "Reconsider", riskTag: "weather-risk-low" | "weather-risk-medium" | "weather-risk-high" }}
+ */
+export function getVerdictAndTag(riskScore) {
+  if (riskScore > 60) {
+    return {
+      verdict: "Reconsider",
+      riskTag: "weather-risk-high",
+    };
+  }
+  if (riskScore > 25) {
+    return {
+      verdict: "Go with caution",
+      riskTag: "weather-risk-medium",
+    };
+  }
+  return {
+    verdict: "Go",
+    riskTag: "weather-risk-low",
+  };
+}
+
+/**
+ * Orchestrates all weather evaluation rules, resolves priorities, and produces
+ * the base recommendation summary.
+ *
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ riskScore: number, verdict: string, riskTag: string, headline: string, alerts: string[], packingList: string[] }}
+ */
+export function computeRecommendation(weather) {
+  const heat = evaluateHeatRule(weather);
+  const cold = evaluateColdRule(weather);
+  const rain = evaluateRainRule(weather);
+  const storm = evaluateStormAndWindRule(weather);
+  const uv = evaluateUvRule(weather);
+  const pleasant = evaluatePleasantRule(weather);
+
+  const totalRisk = Math.min(100, Math.max(0, heat.risk + cold.risk + rain.risk + storm.risk + uv.risk));
+  const { verdict, riskTag } = getVerdictAndTag(totalRisk);
+
+  const allAlerts = [
+    ...storm.alerts,
+    ...heat.alerts,
+    ...cold.alerts,
+    ...rain.alerts,
+    ...uv.alerts,
+    ...pleasant.alerts,
+  ];
+
+  const allPacking = [
+    ...storm.packing,
+    ...cold.packing,
+    ...rain.packing,
+    ...heat.packing,
+    ...uv.packing,
+    ...pleasant.packing,
+  ];
+
+  // Select primary headline by priority of active conditions
+  let headline = "Weather conditions are generally calm. Proceed with your planned travel itinerary.";
+
+  if (storm.severity >= 4) {
+    headline = "Severe storm conditions forecasted - exercise utmost caution and monitor weather alerts.";
+  } else if (storm.severity === 3) {
+    headline = "Gale-force winds expected - anticipate transport disruptions and secure travel plans.";
+  } else if (cold.severity === 3) {
+    headline = "Freezing temperatures expected - pack heavy winter gear and prepare for icy conditions.";
+  } else if (heat.severity === 3) {
+    headline = "Extreme heat advisory in effect - stay well hydrated and limit direct midday sun.";
+  } else if (rain.severity === 2) {
+    headline = "Heavy rainfall likely - plan indoor backups and bring complete rain protection.";
+  } else if (cold.severity === 2) {
+    headline = "Chilly weather forecasted - dress warmly in thermal layers.";
+  } else if (storm.severity === 2) {
+    headline = "Strong winds anticipated - secure loose outdoor gear.";
+  } else if (uv.severity === 2) {
+    headline = "Intense UV radiation expected - apply high SPF sunscreen and wear sun protection.";
+  } else if (rain.severity === 1) {
+    headline = "Moderate chance of showers - an umbrella is recommended.";
+  } else if (heat.severity === 1) {
+    headline = "Warm conditions expected - ideal for early morning or evening outings.";
+  } else if (pleasant.isPleasant) {
+    headline = "Expect sunny skies and pleasant weather - perfect for outdoor travel!";
+  }
+
+  // Deduplicate packing list and limit to top 5 items
+  const uniquePacking = [...new Set(allPacking)].slice(0, 5);
+
+  return {
+    riskScore: totalRisk,
+    verdict,
+    riskTag,
+    headline,
+    alerts: allAlerts,
+    packingList: uniquePacking,
+  };
+}

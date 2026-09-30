@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  computeRecommendation,
   evaluateColdRule,
   evaluateHeatRule,
   evaluatePleasantRule,
@@ -166,6 +167,60 @@ describe("recommender engine", () => {
     it("returns false if rain or high wind is present", () => {
       assert.equal(evaluatePleasantRule({ tempC: 22, rainChancePct: 50 }).isPleasant, false);
       assert.equal(evaluatePleasantRule({ tempC: 22, windKmh: 45 }).isPleasant, false);
+    });
+  });
+
+  describe("computeRecommendation combination & priority", () => {
+    it("assigns Go verdict and weather-risk-low tag for low risk conditions", () => {
+      const weather = {
+        tempC: 22,
+        rainChancePct: 10,
+        windKmh: 15,
+        wmoCode: 1,
+      };
+      const res = computeRecommendation(weather);
+      assert.equal(res.verdict, "Go");
+      assert.equal(res.riskTag, "weather-risk-low");
+      assert.ok(res.riskScore <= 25);
+      assert.match(res.headline, /sunny skies and pleasant weather/);
+    });
+
+    it("assigns Go with caution verdict and weather-risk-medium for moderate hazards", () => {
+      const weather = {
+        tempC: 30, // warm: +10
+        rainChancePct: 65, // high rain: +30
+        windKmh: 20,
+        wmoCode: 61,
+      };
+      const res = computeRecommendation(weather);
+      assert.equal(res.riskScore, 40); // 10 + 30
+      assert.equal(res.verdict, "Go with caution");
+      assert.equal(res.riskTag, "weather-risk-medium");
+      assert.match(res.headline, /Heavy rainfall likely/);
+    });
+
+    it("assigns Reconsider verdict and weather-risk-high for severe conditions", () => {
+      const weather = {
+        tempC: 36, // extreme heat: +35
+        windKmh: 80, // gale wind: +40
+        wmoCode: 95, // thunderstorm: +50
+      };
+      const res = computeRecommendation(weather);
+      assert.ok(res.riskScore > 60);
+      assert.equal(res.verdict, "Reconsider");
+      assert.equal(res.riskTag, "weather-risk-high");
+      assert.match(res.headline, /Severe storm conditions/);
+    });
+
+    it("deduplicates packing list and caps items", () => {
+      const weather = {
+        tempC: 37,
+        rainChancePct: 70,
+        uvIndex: 9,
+      };
+      const res = computeRecommendation(weather);
+      assert.ok(res.packingList.length <= 5);
+      assert.equal(new Set(res.packingList).size, res.packingList.length);
     });
   });
 });
