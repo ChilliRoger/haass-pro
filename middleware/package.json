@@ -16,6 +16,9 @@
     "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\"",
     "format:check": "prettier --check \"src/**/*.js\" \"test/**/*.js\"",
     "check:no-emoji": "node ../scripts/check-no-emoji.js",
+    "demo:warmup": "node ../scripts/warmup.js",
+    "demo:simulate": "node ../scripts/simulate-webhook.js",
+    "demo:scenarios": "node ../scripts/run-demo-scenarios.js",
     "audit": "npm audit --audit-level=high"
   },
   "dependencies": {
