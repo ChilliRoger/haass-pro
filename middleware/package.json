@@ -10,8 +10,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --experimental-test-coverage --test test/unit/",
-    "test:live": "node --test test/live/",
+    "test": "node ../scripts/test-runner.js unit",
+    "test:live": "node ../scripts/test-runner.js live",
     "lint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\"",
     "format:check": "prettier --check \"src/**/*.js\" \"test/**/*.js\"",
