@@ -78,9 +78,15 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Phase 8: Complete presentation runbook and defense script in docs/03-demo-guide.md
 - Phase 8: Modern ESLint flat config tuning for Node 24 web standard globals
 
-## [1.0.0] - TBD
+## [1.0.0] - 2026-09-30
 
-Tag applied after Phase 11 (demo readiness) is complete.
+### Added
+- Phase 9: Render Infrastructure-as-Code blueprint (render.yaml) for 1-click deployment
+- Phase 9: Production deployment guide in docs/04-deployment-guide.md
+- Phase 10: Freshservice tenant configuration manual and business rules runbook in docs/05-freshservice-configuration-guide.md
+- Phase 11: Comprehensive root README.md with sequence diagram, quickstart, and evaluation matrix
+- Phase 11: Known limitations and architectural trade-offs in docs/known-limitations.md
+- Phase 11: 100% clean test suite with 123 unit tests (93%+ coverage), zero lint errors, and zero emojis
 
 ---
 
