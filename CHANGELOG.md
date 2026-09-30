@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 4: Open-Meteo Geocoding client with retry logic and formatted place resolution
+- Phase 4: Tier 1 Forecast (16 days), Tier 2 Seasonal (forecast_months=6), and Tier 3 Current weather API clients
+- Phase 4: Weather tier selector adhering to ADR-004 and FORECAST_MAX_DAYS (14) / SEASONAL_MAX_DAYS (180)
+- Phase 4: WMO weather code mapper (wmo-codes.js) and WeatherData normaliser for internal shape
+- Phase 4: Mock-free unit tests for WMO codes, tier selection, and normalisation
+- Phase 4: Live contract test suite (npm run test:live) testing real Open-Meteo APIs and 14-day boundary
 - Phase 3: Pure date validation functions (date-rules.js) with deterministic calendar horizon calculations
 - Phase 3: Exact error strings enforcing R-20 ("Travel Date cannot be in the past.") and R-21 ("Travel Date must be within the next 12 months.")
 - Phase 3: Boundary unit tests for past dates, today (R-22), exactly 12 months (R-23), >12 months, leap year (Feb 29 -> Feb 28), and format validation
