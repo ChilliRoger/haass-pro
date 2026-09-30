@@ -42,8 +42,6 @@ Desktop.ini
 *.swo
 *~
 
-# Docker
-.dockerignore
 
 # Temporary files
 tmp/

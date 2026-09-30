@@ -1,0 +1,32 @@
+{
+  "name": "haass-weather-travel-middleware",
+  "version": "0.1.0",
+  "description": "Weather-Based Travel Recommendation middleware for Freshservice Service Catalog",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --experimental-test-coverage --test test/unit/",
+    "test:live": "node --test test/live/**/*.test.js",
+    "lint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
+    "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"test/**/*.js\"",
+    "check:no-emoji": "node ../scripts/check-no-emoji.js",
+    "audit": "npm audit --audit-level=high"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2"
+  },
+  "license": "MIT"
+}
