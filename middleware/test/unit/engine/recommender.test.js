@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   evaluateColdRule,
   evaluateHeatRule,
+  evaluatePleasantRule,
   evaluateRainRule,
   evaluateStormAndWindRule,
   evaluateUvRule,
@@ -141,6 +142,30 @@ describe("recommender engine", () => {
     it("returns zero risk when UV index is below 6 or null (seasonal tier)", () => {
       assert.equal(evaluateUvRule({ uvIndex: 4 }).risk, 0);
       assert.equal(evaluateUvRule({ uvIndex: null }).risk, 0);
+    });
+  });
+
+  describe("Pleasant Rule evaluation", () => {
+    it("identifies ideal pleasant conditions (22C, calm, clear)", () => {
+      const res = evaluatePleasantRule({
+        tempC: 22,
+        rainChancePct: 5,
+        windKmh: 12,
+        wmoCode: 0,
+      });
+      assert.equal(res.isPleasant, true);
+      assert.match(res.alerts[0], /Pleasant weather expected with comfortable temperatures around 22C/);
+      assert.ok(res.packing.includes("Comfortable walking shoes"));
+    });
+
+    it("returns false if temperature is too hot or cold", () => {
+      assert.equal(evaluatePleasantRule({ tempC: 32 }).isPleasant, false);
+      assert.equal(evaluatePleasantRule({ tempC: 10 }).isPleasant, false);
+    });
+
+    it("returns false if rain or high wind is present", () => {
+      assert.equal(evaluatePleasantRule({ tempC: 22, rainChancePct: 50 }).isPleasant, false);
+      assert.equal(evaluatePleasantRule({ tempC: 22, windKmh: 45 }).isPleasant, false);
     });
   });
 });

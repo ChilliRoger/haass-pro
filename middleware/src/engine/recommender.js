@@ -243,3 +243,36 @@ export function evaluateUvRule(weather) {
     severity,
   };
 }
+
+/**
+ * Evaluates pleasant and comfortable weather conditions (mild temperatures, low rain, calm winds).
+ *
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ isPleasant: boolean, alerts: string[], packing: string[] }}
+ */
+export function evaluatePleasantRule(weather) {
+  const temp = weather?.tempC;
+  const rainPct = weather?.rainChancePct;
+  const wind = weather?.windKmh;
+  const code = weather?.wmoCode;
+
+  const isMildTemp = typeof temp === "number" && temp >= 18 && temp <= 27;
+  const isLowRain = rainPct === null || rainPct === undefined || rainPct < RAIN_MODERATE_PCT;
+  const isCalmWind = wind === null || wind === undefined || wind < 30;
+  const isClearCode = code === null || code === undefined || code === 0 || code === 1 || code === 2;
+
+  if (isMildTemp && isLowRain && isCalmWind && isClearCode) {
+    const tempStr = Math.round(temp);
+    return {
+      isPleasant: true,
+      alerts: [`Pleasant weather expected with comfortable temperatures around ${tempStr}C. Great conditions for outdoor sightseeing!`],
+      packing: ["Comfortable walking shoes", "Light jacket for evenings", "Sunglasses"],
+    };
+  }
+
+  return {
+    isPleasant: false,
+    alerts: [],
+    packing: [],
+  };
+}
