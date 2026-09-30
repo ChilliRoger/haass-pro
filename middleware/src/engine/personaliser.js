@@ -151,3 +151,153 @@ export function applyBudgetTailoring(budget, weather) {
     packing,
   };
 }
+
+/**
+ * Evaluates special needs and notes for health/accessibility considerations
+ * correlated with expected weather hazards.
+ *
+ * @param {string | boolean | null | undefined} specialNeeds - Special needs flag or details
+ * @param {string | null | undefined} notes - Freeform travel notes
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ cautions: string[], packing: string[] }}
+ */
+export function applySpecialNeedsAwareness(specialNeeds, notes, weather) {
+  const parts = [];
+  if (typeof specialNeeds === 'string') {
+    parts.push(specialNeeds);
+  }
+  if (typeof notes === 'string') {
+    parts.push(notes);
+  }
+  const text = parts.join(' ').toLowerCase();
+
+  const isSpecialNeedsActive =
+    specialNeeds === true ||
+    (typeof specialNeeds === 'string' &&
+      ['yes', 'true', '1'].includes(specialNeeds.trim().toLowerCase())) ||
+    text.length > 0;
+
+  if (!isSpecialNeedsActive && text.length === 0) {
+    return { cautions: [], packing: [] };
+  }
+
+  const cautions = [];
+  const packing = [];
+
+  const temp = weather?.tempC;
+  const isRain = (weather?.rainChancePct ?? 0) >= 30;
+  const isSnow = (weather?.wmoCode ?? 0) >= 71 && (weather?.wmoCode ?? 0) <= 86;
+  const isWindy = (weather?.windKmh ?? 0) >= 35 || (weather?.gustsKmh ?? 0) >= 45;
+  const isHot = typeof temp === 'number' && temp >= 30;
+  const isExtremeHeat = typeof temp === 'number' && temp >= 35;
+  const isCold = typeof temp === 'number' && temp <= 5;
+
+  let keywordMatched = false;
+
+  // 1. Mobility / Accessibility
+  if (
+    text.includes('wheelchair') ||
+    text.includes('mobility') ||
+    text.includes('crutches') ||
+    text.includes('walker') ||
+    text.includes('stroller')
+  ) {
+    keywordMatched = true;
+    if (isRain || isSnow) {
+      cautions.push(
+        'Mobility alert: Wet or slippery walkways increase fall risk; confirm step-free entrances and accessible elevator availability with venues.',
+      );
+      packing.push('Waterproof poncho for mobility device');
+    }
+    if (isExtremeHeat) {
+      cautions.push(
+        'Elevated thermal load can heighten physical fatigue during mobility transit; plan shaded rest intervals and use climate-controlled transport.',
+      );
+    }
+    if (!isRain && !isSnow && !isExtremeHeat) {
+      cautions.push(
+        'Mobility verification: Confirm ramp grades and step-free transit connections along planned routes.',
+      );
+    }
+  }
+
+  // 2. Age / Vulnerability (Seniors, Infants, Pregnancy)
+  if (
+    text.includes('elderly') ||
+    text.includes('senior') ||
+    text.includes('infant') ||
+    text.includes('baby') ||
+    text.includes('toddler') ||
+    text.includes('pregnant') ||
+    text.includes('pregnancy')
+  ) {
+    keywordMatched = true;
+    if (isHot) {
+      cautions.push(
+        'Thermal advisory for vulnerable travelers: High temperatures pose acute dehydration and heat exhaustion risks; schedule indoor activities between 11:00 and 16:00.',
+      );
+      packing.push('Electrolyte rehydration salts');
+    }
+    if (isCold) {
+      cautions.push(
+        'Cold exposure advisory: Vulnerable travelers lose body heat quickly; ensure thermal layering and limit prolonged outdoor exposure.',
+      );
+      packing.push('Thermal base layers');
+    }
+  }
+
+  // 3. Respiratory / Allergies
+  if (
+    text.includes('asthma') ||
+    text.includes('respiratory') ||
+    text.includes('breathing') ||
+    text.includes('allergy') ||
+    text.includes('allergies') ||
+    text.includes('pollen')
+  ) {
+    keywordMatched = true;
+    if (isWindy) {
+      cautions.push(
+        'High winds can disperse airborne dust, mold, and environmental irritants; keep rescue inhalers and antihistamines accessible.',
+      );
+      packing.push('Protective face covering', 'Prescription inhaler / antihistamines');
+    } else if (isHot) {
+      cautions.push(
+        'Hot, humid air can exacerbate respiratory discomfort; avoid strenuous outdoor exertion during midday peaks.',
+      );
+      packing.push('Prescription inhaler / antihistamines');
+    } else {
+      cautions.push(
+        'Carry all required respiratory medication and allergy relief in carry-on baggage.',
+      );
+      packing.push('Prescription inhaler / antihistamines');
+    }
+  }
+
+  // 4. Chronic Medical / Medication storage (Diabetes / Insulin)
+  if (text.includes('diabetic') || text.includes('diabetes') || text.includes('insulin')) {
+    keywordMatched = true;
+    if (isHot) {
+      cautions.push(
+        'Medical storage advisory: Insulin and glucose monitoring test strips degrade above 30C; store medical supplies in an insulated cooling case.',
+      );
+      packing.push('Insulated medication cooling pouch');
+    } else {
+      cautions.push(
+        'Keep medical supplies, monitor devices, and glucose reserves in personal carry-on bags.',
+      );
+    }
+  }
+
+  // 5. Fallback if specialNeeds flag was checked/yes but no known keyword in notes
+  if (!keywordMatched && (specialNeeds === true || String(specialNeeds).toLowerCase() === 'yes')) {
+    cautions.push(
+      'Special assistance requested: Contact airlines and local transit operators in advance to arrange dedicated terminal support.',
+    );
+  }
+
+  return {
+    cautions,
+    packing: [...new Set(packing)],
+  };
+}
