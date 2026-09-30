@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 6: Freshservice REST API v2 client (client.js) with Basic Auth (apiKey:X) and 429 rate limit backoff
+- Phase 6: Flexible custom fields extractor for requested items accommodating arbitrary suffixes
+- Phase 6: Ticket tag read-merge-write update preventing tag clobbering
+- Phase 6: Tag-based stateless idempotency check (weather-brief-posted) adhering to ADR-005
+- Phase 6: Note posting with automatic multipart fallback on HTTP 400 validation error
+- Phase 6: Empirical testing document for note posting formats in samples/note-posting-test-result.md
+- Phase 6: Unit test suite for Freshservice client with 97%+ coverage
 - Phase 5: Safe HTML sanitisation utility (sanitise.js) escaping dangerous characters
 - Phase 5: Deterministic weather recommendation engine (recommender.js) evaluating Heat, Cold, Rain, Storm/Wind, High UV, and Pleasant conditions
 - Phase 5: Composite risk scoring (0-100), verdict calculation (Go, Go with caution, Reconsider), priority ordering, and Freshservice risk tagging (weather-risk-low, weather-risk-medium, weather-risk-high)
