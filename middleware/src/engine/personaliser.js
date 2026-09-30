@@ -82,3 +82,72 @@ export function applyTripTypeTailoring(tripType, weather) {
     packing,
   };
 }
+
+/**
+ * Tailors recommendation advice based on budget range (Low, Medium, High).
+ *
+ * @param {string | null | undefined} budget - "Low" | "Medium" | "High"
+ * @param {import('../engine/normaliser.js').WeatherData} weather
+ * @returns {{ details: string[], packing: string[] }}
+ */
+export function applyBudgetTailoring(budget, weather) {
+  const normBudget = (budget || 'Medium').trim().toLowerCase();
+  const temp = weather?.tempC;
+  const isRain = (weather?.rainChancePct ?? 0) >= 30;
+  const isStorm = (weather?.windKmh ?? 0) >= 50 || (weather?.wmoCode ?? 0) >= 95;
+
+  const details = [];
+  const packing = [];
+
+  switch (normBudget) {
+    case 'high':
+      if (isRain || isStorm || (typeof temp === 'number' && temp >= 32)) {
+        details.push(
+          'Weather premium tip: Pre-book private air-conditioned vehicle transfers to eliminate transit delays during adverse conditions.',
+        );
+      } else {
+        details.push(
+          'Flexible premium booking: Secure priority access / skip-the-line passes for major cultural sites.',
+        );
+      }
+      packing.push('Noise-cancelling transit headphones');
+      break;
+
+    case 'low':
+      if (isRain) {
+        details.push(
+          'Budget alert: Rainy weather causes ride-hail surge pricing; use covered underground metro stations or day transit passes.',
+        );
+        details.push('Free activity: Explore municipal galleries and public indoor arcades.');
+      } else if (typeof temp === 'number' && temp >= 30) {
+        details.push(
+          'Heat savings: Stay hydrated using free city public water fountains; avoid expensive tourist kiosk beverages.',
+        );
+      } else {
+        details.push(
+          'Great value: Weather is ideal for free self-guided walking tours and open public gardens.',
+        );
+      }
+      packing.push('Reusable hydration flask');
+      break;
+
+    case 'medium':
+    default:
+      if (isRain) {
+        details.push(
+          'Transit tip: Combine standard metro lines with verified ride-hailing apps for final-mile connections during rain.',
+        );
+      } else {
+        details.push(
+          'Standard booking: Reserve timed-entry tickets online 24 hours ahead to balance cost and queue times.',
+        );
+      }
+      packing.push('Portable power bank');
+      break;
+  }
+
+  return {
+    details,
+    packing,
+  };
+}
