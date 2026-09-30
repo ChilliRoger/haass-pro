@@ -10,6 +10,9 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Phase 3: Pure date validation functions (date-rules.js) with deterministic calendar horizon calculations
+- Phase 3: Exact error strings enforcing R-20 ("Travel Date cannot be in the past.") and R-21 ("Travel Date must be within the next 12 months.")
+- Phase 3: Boundary unit tests for past dates, today (R-22), exactly 12 months (R-23), >12 months, leap year (Feb 29 -> Feb 28), and format validation
 - Phase 1: docs/01-requirements-analysis.md - full requirements table, date rules, assumptions
 - Phase 1: docs/references.md - all sources with retrieval dates and live-call findings
 - Phase 1: docs/02-architecture.md - Mermaid sequence diagram, component map, data shapes
