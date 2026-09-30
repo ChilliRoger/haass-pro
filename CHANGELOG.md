@@ -29,9 +29,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.1.0] - TBD
+## [0.1.0] - 2026-09-30
 
-Tag applied after Phase 2 (middleware skeleton) is complete.
+### Added
+- Phase 2: Express middleware skeleton with Node.js 24 runtime engines and lockfile
+- Phase 2: Configuration loader with startup validation and named weather thresholds
+- Phase 2: Structured JSON logger with Pino-compatible interface and correlation IDs
+- Phase 2: HTTP Basic authentication middleware using timing-safe comparison (timingSafeEqual)
+- Phase 2: GET /health and GET /ready probe endpoints with helmet security headers
+- Phase 2: POST /webhook/service-request stub returning immediate HTTP 202 Accepted
+- Phase 2: Rate limiting (60 RPM) and 1kb strict JSON body parsing
+- Phase 2: Multi-stage non-root Dockerfile pinned to node:24.21.0-bookworm-slim with healthcheck
+- Phase 2: Mock-free unit test suite with 92%+ coverage using node:test
+- Phase 2: UTF-8 BOM resolution in check-no-emoji script for CI
 
 ## [0.2.0] - TBD
 
@@ -43,4 +53,5 @@ Tag applied after Phase 11 (demo readiness) is complete.
 
 ---
 
-[Unreleased]: https://github.com/ChilliRoger/haass-pro/compare/HEAD...HEAD
+[Unreleased]: https://github.com/ChilliRoger/haass-pro/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ChilliRoger/haass-pro/releases/tag/v0.1.0
